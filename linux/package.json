@@ -1,0 +1,38 @@
+{
+  "name": "headset",
+  "productName": "Headset",
+  "version": "2.1.1",
+  "description": "Discover and collect music on YouTube",
+  "license": "MIT",
+  "author": "Daniel Ravina <hello@headsetapp.co>",
+  "homepage": "http://headsetapp.co",
+  "bugs": "https://github.com/headsetapp/headset-electron/issues",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=development nf start",
+    "electron": "electron .",
+    "player": "./bin/player-window.sh",
+    "production-like": "NODE_ENV=production electron .",
+    "pack": "NODE_ENV=production ./bin/build_package.sh",
+    "dist": "NODE_ENV=production ./bin/build_installer.sh",
+    "build": "npm run pack && npm run dist",
+    "postinstall": "electron-rebuild",
+    "repo": "NEW_VERSION=$npm_package_version ./bin/linux_repo.sh"
+  },
+  "dependencies": {
+    "dbus-native": "^0.4.0",
+    "debug": "^4.1.1",
+    "electron-window-state": "^5.0.3",
+    "mpris-service": "^1.1.4"
+  },
+  "devDependencies": {
+    "electron": "^4.0.2",
+    "electron-installer-debian": "^1.1.0",
+    "electron-installer-redhat": "^1.0.0",
+    "electron-packager": "^13.0.1",
+    "electron-packager-languages": "^0.3.0",
+    "electron-rebuild": "^1.8.2",
+    "foreman": "^3.0.1",
+    "http-server": "^0.11.1"
+  }
+}

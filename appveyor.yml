@@ -1,0 +1,68 @@
+version: "{build}"
+
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+\.\d+/
+
+image: Visual Studio 2017
+
+clone_depth: 1
+
+environment:
+  nodejs_version: "8"
+  CERT_PASSWORD:
+    secure: BOXjWrY24hdw8EhsmLkP5RVxG/aY/16gnAt//DlVIHOadhfJWHgQfh+qI7oUkgP2
+
+cache:
+  - '%APPDATA%\npm-cache'
+
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm ci
+  - cd windows && npm ci && cd..
+
+before_build:
+  - npm run lint windows
+
+build_script:
+  - cd windows
+  - npm run pack
+  - npm run dist 2> $null
+  - npm run choco
+
+test_script:
+  - cd ..
+  - npm run test:windows
+
+artifacts:
+  - path: windows\build\installers\headset-*-setup.exe
+    name: HeadsetApp
+  - path: windows\build\installers\headset-*-full.nupkg
+    name: HeadsetNupkg
+  - path: windows\build\installers\RELEASES
+    name: HeadsetReleases
+  - path: windows\build\headset.*.nupkg
+    name: HeadsetChoco
+
+deploy:
+  - provider: GitHub
+    artifact: HeadsetApp, HeadsetNupkg, HeadsetReleases
+    auth_token: $(GITHUB_TOKEN)
+    draft: true
+    description: ''
+    on:
+      appveyor_repo_tag: true
+  - provider: NuGet
+    server: https://push.chocolatey.org/
+    artifact: HeadsetChoco
+    skip_symbols: true
+    api_key: $(CHOCO_TOKEN)
+    on:
+      appveyor_repo_tag: true
+
+notifications:
+  - provider: Slack
+    auth_token:
+      secure: npn0SEwIlCoQgqThPkawpHuj551XN5gtIBuH+fEGEsCM0WW9lNOCUsgOxrSch1GOzEnnVWSbWreH/ZSlOXYhvS7bPz32djVyAf+jZ5u/qxw=
+    channel: '#travis-ci'
